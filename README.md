@@ -8,6 +8,8 @@ This project was created in inspriation from Tech With Soleyman!  Within this pr
 The following services will be used:
 - S3
 - IAM
+- EventBridge
+- SNS
 - GuardDuty
 Additionally, these services will be configured via *Terraform*.
 
