@@ -6,43 +6,43 @@ This document outlines the architecture to be implemented in the project. The di
 ![s3-website-architecture](s3-website-project-architecture.jpg)
 
 # Requirements
-To understand the architecture diagram, requirements must first be established.  In this project, we hope to do the following:
+To understand the architecture diagram, we must first establish the requirements. In this project, we aim to:
 - Create an S3 bucket that can host a static website
-- The website can be accessed by the public
-- The bucket contents can only be modified by users with granted permissions 
-- Ensure malicious content is not being store in the bucket
-- The account owner must be alerted if malicious files have been uploaded
+- Ensure the website is publicly accessible
+- Restrict bucket content modifications to authorized users
+- Prevent the storage of malicious content in the bucket
+- Alert the account owner if malicious files are uploaded
 
 # Functionality
-In conjunction with requirements, user functionality must be identitified:
-- User can upload files via Python SDK
-- User can access the S3 website through the internet
-- User can view emails of identified vulnerabilities
+In addition to the requirements, we must identify user functionalities:
+- Users can upload files via the Python SDK
+- Users can access the S3 website through the internet
+- Users can receive emails about identified vulnerabilities
 
 # Architecture Breakdown
 **Components**
 
 *S3* 
-  - A bucket that is used to host our static website
-  - Publicly accessible via Internet
-  - Uploads are limited to IAM roles
+  - A bucket used to host our static website
+  - Publicly accessible via the internet
+  - Uploads are restricted to IAM roles
 
 *IAM*
-  - Creates an IAM role that is assume to the user
-  - This role contains a policy that grants access to S3 actions
+  - Creates an IAM role that users can assume
+  - This role includes a policy granting access to S3 actions
 
 *GuardDuty*
-  - Initiates scans on S3 bucket for malicious files
-  - If malicious, triggers to an event
+  - Scans the S3 bucket for malicious files
+  - Triggers an event if malicious files are detected
 
 *EventBridge*
-  - Used to retrieve critical alerts from GuardDuty
-  - Once retrieved, the information triggers an SNS push
+  - Retrieves critical alerts from GuardDuty
+  - Triggers an SNS push with the retrieved information
 
 *SNS*
-  - SNS subscription created to alert email
-  - SNS topic is made to include subscription protocol
-  - User will be emailed once trigger goes off from EventBridge
+  - Creates an SNS subscription to send alerts via email
+  - Defines an SNS topic to include the subscription protocol
+  - Sends an email to the user when EventBridge triggers an alert
 
 # Benefits
 This architecture offers several advantages:
