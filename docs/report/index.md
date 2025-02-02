@@ -3,11 +3,12 @@
 ### Created and Written By - Justin Ng
 ### Started: January 19, 2025
 
-# Terraform Work
+# Process Documentation
+
+## Terraform Work
 Once the architecture was documented and written up, it was time to start working on building the infrastructure out.  I first started by creating the necessary Terraform files that would be needed.  In my approach, I've decided to separate the Terraform resources via service.  For example, the S3 resources would be stored in `s3.tf` while IAM related resources would be managed in `iam.tf`.
 
 
-## Process
 
 ### S3
 The first thing that I began to work on was the S3 bucket.  Following [documentation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket), I was able to create the bucket.  NOTE: When configuring the bucket, I enabled the `force_destroy` argument as when completing the project I would like to be able to destroy the bucket without removing all the resources inside.  
@@ -37,6 +38,20 @@ The next step in the process was configuring the role itself.  The role needs a 
 
 *Showcase of bucket policy attachment within s3 bucket*<br>
 <img src="./img/bucket-policy.png" alt="bucket-policy"/>
+
+## Detour - Python Coding
+Once this was done, I began working on the Python script before moving onto the other architectures.  The reason for this was to confirm that the IAM permissions were sufficient enough to complete the task.  The first thing I did to start this process was look at the available functions for the S3 client.  This was done by reading the [AWS documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html).  After gathering this information, I wanted to create a script that did the following:
+
+```
+- Reads from a list of files in a subdirectory called "to-upload"
+- Verify these files are supported file types (.html, .css, .jpg, .png, etc.)
+- Check if any of these files are inside the bucket already
+- If the files are not, upload to the bucket
+- If the files are inside the bucket, ask for confirmation before overriding the current version
+- Move completed files into another sub-directory "uploaded"
+- List out the files that are successfully uploaded to the bucket
+```
+ 
 
 **Challenges**
 When working with Terraform, the most challenging part of this portion had to be the interconnected components required to build up infrastructure.  When working with policies, it is important to follow the *principle of least privilege*, allowing only specific resources to have access.  For example, we want only the *role* to be able to create objects in S3.  Others would only be able to view the website and its contents.
