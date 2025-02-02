@@ -20,6 +20,42 @@ resource "aws_iam_role" "website_access_role" {
   }
 }
 
+# Policy to allow access to specific S3 bucket
+resource "aws_iam_policy" "s3_access_policy" {
+  name        = "s3_website_access_policy"
+  description = "Policy to allow access to specific S3 bucket"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        # Limit the s3 actions to only the ones needed
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket",
+        ]
+        Effect = "Allow"
+        # Reference the bucket ARN
+        Resource = [
+          aws_s3_bucket.bucket.arn,
+          "${aws_s3_bucket.bucket.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
+
+# Attach policy to role
+resource "aws_iam_role_policy_attachment" "s3_role_policy_attachment" {
+  role       = aws_iam_role.website_access_role.name
+  policy_arn = aws_iam_policy.s3_access_policy.arn
+}
+
+
+# Role policy to allow user to assume role
 resource "aws_iam_policy" "assume_role_policy" {
   name        = "AllowAssumeRole"
   description = "Policy to allow user to assume a role"
@@ -40,6 +76,7 @@ data "aws_iam_user" "user" {
   user_name = "justin"
 }
 
+# Assigning policy to user
 resource "aws_iam_policy_attachment" "user_role_attachment" {
   name       = "user_role_attachment"
   policy_arn = aws_iam_policy.assume_role_policy.arn
