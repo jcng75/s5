@@ -51,7 +51,7 @@ Once this was done, I began working on the Python script before moving onto the 
 - Move completed files into another sub-directory "uploaded"
 - List out the files that are successfully uploaded to the bucket
 ```
- 
+
 
 **Challenges**
 When working with Terraform, the most challenging part of this portion had to be the interconnected components required to build up infrastructure.  When working with policies, it is important to follow the *principle of least privilege*, allowing only specific resources to have access.  For example, we want only the *role* to be able to create objects in S3.  Others would only be able to view the website and its contents.
@@ -80,5 +80,3 @@ For the IAM Policy, I had this error:
 Error: creating IAM Role (s3_website_access_role): MalformedPolicyDocument: The following Statement Ids are invalid: Assume Role to Access S3 Bucket
 ```
 This error indicated that I was using the SID wrong.  While I was using it as a statement identifier, the way I used it having "Assume Role to Access S3 Bucket" was closer to a description.  As a result, I changed it to `AssumeRolePolicy` and that fixed the problem.
-
-
