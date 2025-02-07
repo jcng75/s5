@@ -52,6 +52,13 @@ Once this was done, I began working on the Python script before moving onto the 
 - List out the files that are successfully uploaded to the bucket
 ```
 
+As I was working on the script, I began to notice something with how I was configuring my S3 bucket.  In the boto3 documents for [get_object](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/get_object.html), I read about how the objects were encrypted.  By default, the bucket configuration was set to *Server-side encryption with Amazon S3 managed keys (SSE-S3)*.  Essentially, this means that objects are encrypted and decrypted at rest using AES-256 (Advanced Encryption Standard).  Encryption is what keeps our object data in an unreadable format to others.  Without a proper key, users would not be able to properly view these files.  One suggestion that could be made would be creating my own KMS key that I'd manage.  Since this bucket's intentions are towards creating a public website where the files are viewable, I will not be making this change.
+
+*Screenshots*
+
+*Showcase of S3 Object Encryption Configuration*<br>
+<img src="./img/s3-encryption.png" alt="s3-encryption"/>
+
 
 **Challenges**
 When working with Terraform, the most challenging part of this portion had to be the interconnected components required to build up infrastructure.  When working with policies, it is important to follow the *principle of least privilege*, allowing only specific resources to have access.  For example, we want only the *role* to be able to create objects in S3.  Others would only be able to view the website and its contents.
