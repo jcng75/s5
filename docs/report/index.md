@@ -35,6 +35,7 @@ The next step in the process was configuring the role itself.  The role needs a 
 
 *Showcase of assume role policy added to justin user*<br>
 <img src="./img/role-assume-policy.png" alt="assume-policy"/>
+(Please note that Administrator privileges were added to run the terraform plans/applies)
 
 *Showcase of bucket policy attachment within s3 bucket*<br>
 <img src="./img/bucket-policy.png" alt="bucket-policy"/>
@@ -65,6 +66,12 @@ Tagged file index.html in bucket: s3-static-website-bucket-7950
 ```
 
 The screenshot of index.html can be found below.  Observe that the index.html file uses the css properties stored from styles.css!
+
+To authenticate the security of our work, I have ran the script without permissions and received the following:
+
+```
+botocore.exceptions.ClientError: An error occurred (AccessDenied) when calling the PutObject operation: User: arn:aws:iam::xxxxxxxxxx:user/justin is not authorized to perform: s3:PutObject on resource: "arn:aws:s3:::s3-static-website-bucket-7950/styles.css" because no identity-based policy allows the s3:PutObject action
+```
 
 
 *Screenshots*

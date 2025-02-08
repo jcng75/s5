@@ -3,7 +3,7 @@ import os
 import sys
 import botocore
 import mimetypes
-from s3_client import s3_client
+from dotenv import load_dotenv
 
 # Usecase: Upload files from to_upload directory to S3 bucket
 # 1. Get all files from the to_upload directory
@@ -21,11 +21,10 @@ def get_files():
 
 
 # Check if files are already uploaded into the S3 bucket
-def check_files(bucket, files):
-    s3 = s3_client.get_instance()
+def check_files(client, bucket, files):
     for file in files:
         try:
-            s3.head_object(Bucket=bucket, Key=file)
+            client.head_object(Bucket=bucket, Key=file)
             print(f"File {file} found in the S3 bucket")
         except botocore.exceptions.ClientError as e:
             print(f"File {file} not found in the S3 bucket")
@@ -33,13 +32,12 @@ def check_files(bucket, files):
 
 
 # Upload files to the S3 bucket - given the list of files
-def upload_files(files, bucket, dry_run):
+def upload_files(client, files, bucket, dry_run):
     if dry_run:
         print("Dry run enabled. Files will not be uploaded to the S3 bucket")
         print("Files would have been uploaded: ", files)
         return
     
-    s3 = s3_client.get_instance()
     for file in files:
 
         content_type = mimetypes.guess_type(file)[0]
@@ -48,7 +46,7 @@ def upload_files(files, bucket, dry_run):
         # Initialize upload_success before uploading the file
         upload_success = None
         with open(path, "rb") as file_path:
-            upload_success = s3.put_object(Body=file_path, 
+            upload_success = client.put_object(Body=file_path, 
                                            Bucket=bucket, 
                                            Key=file,
                                            ContentType=content_type)
@@ -57,7 +55,7 @@ def upload_files(files, bucket, dry_run):
         else:
             continue
         # We want to tag the object as uploaded through Python
-        tag_success = s3.put_object_tagging(
+        tag_success = client.put_object_tagging(
             Bucket=bucket,
             Key=file,
             Tagging={
@@ -87,11 +85,25 @@ def main(args):
             print("Dry run has been enabled.")
             dry_run_flag = True
 
+    load_dotenv()
+
+    session = boto3.Session()
+    sts = session.client("sts")
+    response = sts.assume_role(
+        RoleArn=os.environ["ROLE_ARN"],
+        RoleSessionName="s3rw-session"
+    )
+
+    new_session = boto3.Session(aws_access_key_id=response['Credentials']['AccessKeyId'],
+                      aws_secret_access_key=response['Credentials']['SecretAccessKey'],
+                      aws_session_token=response['Credentials']['SessionToken'])
+    
+    client = new_session.client("s3")
     
     s3_bucket = "s3-static-website-bucket-7950"
     files = get_files()
-    check_files(s3_bucket, files)
-    upload_files(files, s3_bucket, dry_run_flag)
+    check_files(client, s3_bucket, files)
+    upload_files(client, files, s3_bucket, dry_run_flag)
 
 
 if __name__ == "__main__":
