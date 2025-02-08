@@ -73,6 +73,23 @@ To authenticate the security of our work, I have ran the script without permissi
 botocore.exceptions.ClientError: An error occurred (AccessDenied) when calling the PutObject operation: User: arn:aws:iam::xxxxxxxxxx:user/justin is not authorized to perform: s3:PutObject on resource: "arn:aws:s3:::s3-static-website-bucket-7950/styles.css" because no identity-based policy allows the s3:PutObject action
 ```
 
+From an outsider's perspective, this is essentially saying that a user cannot put their object into the s3 bucket.  In our case, we want to be able to assume the role to be able to do this in our python code.  Working on the implementations for assuming the role, I utilized [sessions](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html) to manage the assumed role.  The assumed role contained the policy that we created in the previous part.  It took some more debugging to update the policy, as I ran into the following error:
+
+```
+botocore.exceptions.ClientError: An error occurred (AccessDenied) when calling the AssumeRole operation: User: arn:aws:iam::xxxxxxxxxxxx:user/justin is not authorized to perform: sts:AssumeRole on resource: arn:aws:iam::xxxxxxxxxxxx:role/s3_website_access_role
+```
+
+Once the policy was updated, I realized that we then have to create a new session from the original created (hence `new_session`) that uses the response parameters from the sts.assume_role() function call.  In doing so, after removing the Admin Credentials that were used to create the terraform resources, the script was still able to successfully populate the bucket with files:
+
+```
+File styles.css found in the S3 bucket
+File index.html found in the S3 bucket
+Uploaded file styles.css to bucket: s3-static-website-bucket-7950
+Tagged file styles.css in bucket: s3-static-website-bucket-7950
+Uploaded file index.html to bucket: s3-static-website-bucket-7950
+Tagged file index.html in bucket: s3-static-website-bucket-7950
+```
+
 
 *Screenshots*
 
@@ -83,7 +100,7 @@ botocore.exceptions.ClientError: An error occurred (AccessDenied) when calling t
 <img src="./img/s3-upload.png" alt="s3-upload"/>
 
 
-**Challenges**
+**Project Challenges**
 When working with Terraform, the most challenging part of this portion had to be the interconnected components required to build up infrastructure.  When working with policies, it is important to follow the *principle of least privilege*, allowing only specific resources to have access.  For example, we want only the *role* to be able to create objects in S3.  Others would only be able to view the website and its contents.
 
 When running the S3 resource applies, I ran into the following error message attempting to create the S3 bucket policy and attaching it to the S3 Bucket:
@@ -107,7 +124,7 @@ After looking into it, I learned that this can be caused by the Principal field 
 ```
 For the IAM Policy, I had this error:
 ```
-Error: creating IAM Role (s3_website_access_role): MalformedPolicyDocument: The following Statement Ids are invalid: Assume Role to Access S3 Bucket
+Error: creating IAM Role (website_access_role): MalformedPolicyDocument: The following Statement Ids are invalid: Assume Role to Access S3 Bucket
 ```
 This error indicated that I was using the SID wrong.  While I was using it as a statement identifier, the way I used it having "Assume Role to Access S3 Bucket" was closer to a description.  As a result, I changed it to `AssumeRolePolicy` and that fixed the problem.
 
@@ -115,8 +132,8 @@ When working on the Python script, I had a few errors with the boto3 API.  When 
 ```
 path = f"./to_upload/{file}"
 with open(path, "r") as file_path:
-    upload_success = s3.put_object(Body=file_path, 
-                                   Bucket=bucket, 
+    upload_success = s3.put_object(Body=file_path,
+                                   Bucket=bucket,
                                    Key=file)
 ```
 The first issue that I noticed was after seeing this error:

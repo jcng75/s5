@@ -28,7 +28,6 @@ def check_files(client, bucket, files):
             print(f"File {file} found in the S3 bucket")
         except botocore.exceptions.ClientError as e:
             print(f"File {file} not found in the S3 bucket")
-    
 
 
 # Upload files to the S3 bucket - given the list of files
@@ -37,7 +36,7 @@ def upload_files(client, files, bucket, dry_run):
         print("Dry run enabled. Files will not be uploaded to the S3 bucket")
         print("Files would have been uploaded: ", files)
         return
-    
+
     for file in files:
 
         content_type = mimetypes.guess_type(file)[0]
@@ -46,11 +45,10 @@ def upload_files(client, files, bucket, dry_run):
         # Initialize upload_success before uploading the file
         upload_success = None
         with open(path, "rb") as file_path:
-            upload_success = client.put_object(Body=file_path, 
-                                           Bucket=bucket, 
-                                           Key=file,
-                                           ContentType=content_type)
-        if upload_success: 
+            upload_success = client.put_object(
+                Body=file_path, Bucket=bucket, Key=file, ContentType=content_type
+            )
+        if upload_success:
             print(f"Uploaded file {file} to bucket: {bucket}")
         else:
             continue
@@ -58,20 +56,12 @@ def upload_files(client, files, bucket, dry_run):
         tag_success = client.put_object_tagging(
             Bucket=bucket,
             Key=file,
-            Tagging={
-                "TagSet": [
-                    {
-                        "Key": "Orchestration",
-                        "Value": "Python"
-                    }
-                ]
-            }
+            Tagging={"TagSet": [{"Key": "Orchestration", "Value": "Python"}]},
         )
         if tag_success:
             print(f"Tagged file {file} in bucket: {bucket}")
-    
+
     return
-    
 
 
 def main(args):
@@ -80,7 +70,9 @@ def main(args):
     dry_run_flag = False
     for arg in args:
         if arg not in suitable_args:
-            print(f"Invalid argument: {arg} - Please use one of the following: {suitable_args}")
+            print(
+                f"Invalid argument: {arg} - Please use one of the following: {suitable_args}"
+            )
         else:
             print("Dry run has been enabled.")
             dry_run_flag = True
@@ -90,16 +82,17 @@ def main(args):
     session = boto3.Session()
     sts = session.client("sts")
     response = sts.assume_role(
-        RoleArn=os.environ["ROLE_ARN"],
-        RoleSessionName="s3rw-session"
+        RoleArn=os.environ["ROLE_ARN"], RoleSessionName="s3rw-session"
     )
 
-    new_session = boto3.Session(aws_access_key_id=response['Credentials']['AccessKeyId'],
-                      aws_secret_access_key=response['Credentials']['SecretAccessKey'],
-                      aws_session_token=response['Credentials']['SessionToken'])
-    
+    new_session = boto3.Session(
+        aws_access_key_id=response["Credentials"]["AccessKeyId"],
+        aws_secret_access_key=response["Credentials"]["SecretAccessKey"],
+        aws_session_token=response["Credentials"]["SessionToken"],
+    )
+
     client = new_session.client("s3")
-    
+
     s3_bucket = "s3-static-website-bucket-7950"
     files = get_files()
     check_files(client, s3_bucket, files)

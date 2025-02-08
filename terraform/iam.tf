@@ -12,7 +12,7 @@ resource "aws_iam_role" "website_access_role" {
         Effect = "Allow"
         Sid    = "AssumeRolePolicy"
         Principal = {
-          AWS = "*"
+          AWS = data.aws_iam_user.user.arn
         }
       }
     ]
