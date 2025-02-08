@@ -100,7 +100,7 @@ Tagged file index.html in bucket: s3-static-website-bucket-7950
 <img src="./img/s3-upload.png" alt="s3-upload"/>
 
 
-**Project Challenges**
+**Project Challenges** <br>
 When working with Terraform, the most challenging part of this portion had to be the interconnected components required to build up infrastructure.  When working with policies, it is important to follow the *principle of least privilege*, allowing only specific resources to have access.  For example, we want only the *role* to be able to create objects in S3.  Others would only be able to view the website and its contents.
 
 When running the S3 resource applies, I ran into the following error message attempting to create the S3 bucket policy and attaching it to the S3 Bucket:
