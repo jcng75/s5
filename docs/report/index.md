@@ -90,6 +90,11 @@ Uploaded file index.html to bucket: s3-static-website-bucket-7950
 Tagged file index.html in bucket: s3-static-website-bucket-7950
 ```
 
+At this stage of the project, I gained a clear understanding of how the policies and principles interacted with the proposed architecture. The bucket policy is the primary policy governing access to the S3 bucket itself. Initially, this policy was correctly configured, with only the S3 Role as the principal for restricted actions.
+
+Three additional policies needed to be created. The first policy was for the S3 role upon creation. This specific policy, `s3_website_access_role`, was intended to grant access to assume the role. Initially, it was configured with `s3.amazonaws.com` as the principal. However, this was incorrect because the *Principal* refers to the entity that is allowed to assume the role. In this case, the user who will be assuming the role needs permission, not the service itself. The second policy, `s3_website_access_policy`, granted the assumed user permissions by attaching it to the IAM role. This policy allowed access to the restricted actions, which would only be granted after the role was assumed. The final policy was for the user `justin`. Without this policy, the user wouldn't have been able to perform the AssumeRole action, even if the role permitted it. To adhere to the principle of least privilege, the policy restricts the Resource to the role ARN.
+
+One key lesson I learned when creating these policies was the distinction between Principal and Resource. The **Principal** defines who the policy applies to, whereas the **Resource** specifies the item or set of resources that can be *affected* by the policy’s actions.
 
 *Screenshots*
 
