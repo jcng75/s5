@@ -48,7 +48,6 @@ Once this was done, I began working on the Python script before moving onto the 
 - Check if any of these files are inside the bucket already
 - If the files are not, upload to the bucket
 - If the files are inside the bucket, ask for confirmation before overriding the current version
-- Move completed files into another sub-directory "uploaded"
 - List out the files that are successfully uploaded to the bucket
 ```
 
