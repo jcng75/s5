@@ -1,3 +1,6 @@
+data "aws_caller_identity" "current" {}
+
+# ALlow only specific user to be able to assume role
 resource "aws_iam_role" "website_access_role" {
   name = "s3_website_access_role"
 
@@ -9,7 +12,7 @@ resource "aws_iam_role" "website_access_role" {
         Effect = "Allow"
         Sid    = "AssumeRolePolicy"
         Principal = {
-          Service = "s3.amazonaws.com"
+          AWS = data.aws_iam_user.user.arn
         }
       }
     ]
@@ -33,8 +36,9 @@ resource "aws_iam_policy" "s3_access_policy" {
         Action = [
           "s3:GetObject",
           "s3:PutObject",
+          "s3:PutObjectTagging",
           "s3:DeleteObject",
-          "s3:ListBucket",
+          "s3:ListBucket"
         ]
         Effect = "Allow"
         # Reference the bucket ARN
@@ -76,7 +80,7 @@ data "aws_iam_user" "user" {
   user_name = "justin"
 }
 
-# Assigning policy to user
+# Assigning assumerole policy to user
 resource "aws_iam_policy_attachment" "user_role_attachment" {
   name       = "user_role_attachment"
   policy_arn = aws_iam_policy.assume_role_policy.arn

@@ -22,7 +22,7 @@ In addition to the requirements, we must identify user functionalities:
 # Architecture Breakdown
 **Components**
 
-*S3* 
+*S3*
   - A bucket used to host our static website
   - Publicly accessible via the internet
   - Uploads are restricted to IAM roles
