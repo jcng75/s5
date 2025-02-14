@@ -104,6 +104,10 @@ One key lesson I learned when creating these policies was the distinction betwee
 *Showcase of S3 Object Upload*<br>
 <img src="./img/s3-upload.png" alt="s3-upload"/>
 
+## Terraform - GuardDuty
+
+Getting back into the swing of things with Terraform, it was time to start the next part of the project - GuardDuty!  The goal of this part was to assist in scanning the S3 bucket for malicious files and CloudEvent
+
 
 **Project Challenges** <br>
 When working with Terraform, the most challenging part of this portion had to be the interconnected components required to build up infrastructure.  When working with policies, it is important to follow the *principle of least privilege*, allowing only specific resources to have access.  For example, we want only the *role* to be able to create objects in S3.  Others would only be able to view the website and its contents.
