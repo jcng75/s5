@@ -40,6 +40,34 @@ The next step in the process was configuring the role itself.  The role needs a 
 *Showcase of bucket policy attachment within s3 bucket*<br>
 <img src="./img/bucket-policy.png" alt="bucket-policy"/>
 
+*Challenges*<br>
+When working with S3 and IAM, the most challenging part of this portion had to be the interconnected components required to build up infrastructure.  When working with policies, it is important to follow the *principle of least privilege*, allowing only specific resources to have access.  For example, we want only the *role* to be able to create objects in S3.  Others would only be able to view the website and its contents.
+
+When running the S3 resource applies, I ran into the following error message attempting to create the S3 bucket policy and attaching it to the S3 Bucket:
+
+```
+Error: Error putting S3 policy: AccessDenied: User: arn:aws:iam::xxxxxxxxxx:user/justin is not authorized to perform: s3:PutBucketPolicy on resource: "arn:aws:s3:::s3-static-website-bucket-7950" because public policies are blocked by the BlockPublicPolicy block public access setting.
+```
+
+After doing [research](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_acl), I found that I had not configured the S3 Bucket ACL via terraform.  After doing so, I was able to properly view the bucket and its contents.
+
+When configuring the policies, I saw a few errors:
+```
+Error: Error putting S3 policy: MalformedPolicy: Invalid policy syntax.
+```
+After looking into it, I learned that this can be caused by the Principal field misrepresented as a string rather than its inteded object.  After making the change, it looked like this:
+
+```
+    Principal = {
+      AWS = aws_iam_role.website_access_role.arn
+      }
+```
+For the IAM Policy, I had this error:
+```
+Error: creating IAM Role (website_access_role): MalformedPolicyDocument: The following Statement Ids are invalid: Assume Role to Access S3 Bucket
+```
+This error indicated that I was using the SID wrong.  While I was using it as a statement identifier, the way I used it having "Assume Role to Access S3 Bucket" was closer to a description.  As a result, I changed it to `AssumeRolePolicy` and that fixed the problem.
+
 ## Detour - Python Coding
 Once this was done, I began working on the Python script before moving onto the other architectures.  The reason for this was to confirm that the IAM permissions were sufficient enough to complete the task.  The first thing I did to start this process was look at the available functions for the S3 client.  This was done by reading the [AWS documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html).  After gathering this information, I wanted to create a script that did the following:
 
@@ -96,47 +124,7 @@ Three additional policies needed to be created. The first policy was for the S3 
 
 One key lesson I learned when creating these policies was the distinction between Principal and Resource. The **Principal** defines who the policy applies to, whereas the **Resource** specifies the item or set of resources that can be *affected* by the policy’s actions.
 
-*Screenshots*
-
-*Showcase of S3 Object Encryption Configuration*<br>
-<img src="./img/s3-encryption.png" alt="s3-encryption"/>
-
-*Showcase of S3 Object Upload*<br>
-<img src="./img/s3-upload.png" alt="s3-upload"/>
-
-## Terraform - GuardDuty
-
-Getting back into the swing of things with Terraform, it was time to start the next part of the project - GuardDuty!  The goal of this part was to assist in scanning the S3 bucket for malicious files and CloudEvent
-
-
-**Project Challenges** <br>
-When working with Terraform, the most challenging part of this portion had to be the interconnected components required to build up infrastructure.  When working with policies, it is important to follow the *principle of least privilege*, allowing only specific resources to have access.  For example, we want only the *role* to be able to create objects in S3.  Others would only be able to view the website and its contents.
-
-When running the S3 resource applies, I ran into the following error message attempting to create the S3 bucket policy and attaching it to the S3 Bucket:
-
-```
-Error: Error putting S3 policy: AccessDenied: User: arn:aws:iam::xxxxxxxxxx:user/justin is not authorized to perform: s3:PutBucketPolicy on resource: "arn:aws:s3:::s3-static-website-bucket-7950" because public policies are blocked by the BlockPublicPolicy block public access setting.
-```
-
-After doing [research](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_acl), I found that I had not configured the S3 Bucket ACL via terraform.  After doing so, I was able to properly view the bucket and its contents.
-
-When configuring the policies, I saw a few errors:
-```
-Error: Error putting S3 policy: MalformedPolicy: Invalid policy syntax.
-```
-After looking into it, I learned that this can be caused by the Principal field misrepresented as a string rather than its inteded object.  After making the change, it looked like this:
-
-```
-    Principal = {
-      AWS = aws_iam_role.website_access_role.arn
-      }
-```
-For the IAM Policy, I had this error:
-```
-Error: creating IAM Role (website_access_role): MalformedPolicyDocument: The following Statement Ids are invalid: Assume Role to Access S3 Bucket
-```
-This error indicated that I was using the SID wrong.  While I was using it as a statement identifier, the way I used it having "Assume Role to Access S3 Bucket" was closer to a description.  As a result, I changed it to `AssumeRolePolicy` and that fixed the problem.
-
+*Additional Challenges*<br>
 When working on the Python script, I had a few errors with the boto3 API.  When using the put_object method, I was unable to properly upload files to the bucket.  In my previous implementation, I had:
 ```
 path = f"./to_upload/{file}"
@@ -157,3 +145,46 @@ open(path, "rb")
 ```
 
  After seeing that the files were uploaded, I could no longer view them as HTML documents visiting the bucket.  Instead, each time I would visit the S3 website I would be forced to download the file.  After looking through a few fourms, I found that this is because the `ContentType` field in my [put_object](https://stackoverflow.com/questions/18296875/amazon-s3-downloads-index-html-instead-of-serving) method.  Lastly, these changes did not propagate onto the website instantly.  These changes only showed when viewing through an incognito browser.  I believe that this could be due to browser caching and cookies.  Once I cleared my cache, this issue was resolved.
+
+
+*Screenshots*
+
+*Showcase of S3 Object Encryption Configuration*<br>
+<img src="./img/s3-encryption.png" alt="s3-encryption"/>
+
+*Showcase of S3 Object Upload*<br>
+<img src="./img/s3-upload.png" alt="s3-upload"/>
+
+## Terraform - GuardDuty
+
+Getting back into the swing of things with Terraform, it was time to start the next part of the project - GuardDuty!  The goal of this part was to assist in scanning the S3 bucket for malicious uploaded files as well as any incoming security events within the specific bucket.  After many challenges (see below), I was able to finally configure the bucket to use GuardDuty.  
+
+Looking at the [documentation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/guardduty_malware_protection_plan), to get Malware Protection Scanning, an additional resource was created.  To maintain security, a new IAM role was created with an additional policy was created to be referenced in that resource.  A few tests were done once GuardDuty was configured.
+
+Viewing the initial findings (see first screenshot), it stated that the CreateMalwareProtectionPlan was invoked using root credentials.  When creating terraform resources I've used the root credentials.  This is a good lesson to utilize the user `justin` instead.  The second finding warned about allowing Anonymous Access to the S3 bucket.  Since the bucket was configured to be a publicly accessible S3 website, this behavior is intended.  When testing the upload image features, I attempted to upload a dangerous HTML file (malicious.html).  This HTML file was intended to contain a malicious URL that users may click on.  When testing the upload, GuardDuty has tagged the object as "NO_THREATS_FOUND".  Looking into the reason why, GuardDuty does not scan HTML files for vulnerabilities.  Instead, it would be able to detect Malware such as executable files and suspicious traffic to servers.  At this point in the experiment, I did not have a malicious executible and proceeded with the next set of resources to create.
+
+*Challenges*<br>
+The error that took the longest was when I had to create the Malware Protection Plan.  
+
+```
+│ Error: creating AWS GuardDuty Malware Protection Plan (malware protection)
+│
+│   with aws_guardduty_malware_protection_plan.protection_plan,
+│   on guardduty.tf line 19, in resource "aws_guardduty_malware_protection_plan" "protection_plan":
+│   19: resource "aws_guardduty_malware_protection_plan" "protection_plan" {
+│
+│ operation error GuardDuty: CreateMalwareProtectionPlan, https response error StatusCode: 400, RequestID: 80796efd-3025-4c24-acef-f787e34d4aa2, BadRequestException: The request was rejected because the provided IAM role does not have
+│ the required EventBridge PutRule and PutTargets permissions to create a Managed Rule.
+```
+
+Looking at various sources, I had ensured that proper S3 actions were accounted for.  What I failed to consider was access to AWS events.  Reading this [article](https://docs.aws.amazon.com/guardduty/latest/ug/malware-protection-s3-iam-policy-prerequisite.html) on the configuration, I followed similarly when creating the policy.  This fixed the problem and the GuardDuty resource was able to be created.
+
+*Screenshots*
+*Showcase of GuardDuty Findings in S3 Bucket*<br>
+<img src="./img/guardduty-findings.png" alt="guardduty-findings"/>
+
+*Showcase of GuardDuty Tagging for S3 Object*<br>
+<img src="./img/guardduty-scan-tag.png" alt="guardduty-scan-tag"/>
+
+*Showcase of GuardDuty Malicious File Attempt*<br>
+<img src="./img/guardduty-scan-tag-2.png" alt="guardduty-scan-tag-2"/>
