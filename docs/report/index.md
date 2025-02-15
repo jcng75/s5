@@ -188,3 +188,27 @@ Looking at various sources, I had ensured that proper S3 actions were accounted 
 
 *Showcase of GuardDuty Malicious File Attempt*<br>
 <img src="./img/guardduty-scan-tag-2.png" alt="guardduty-scan-tag-2"/>
+
+## SNS
+
+Initially, the next service that I was going to build out was EventBridge.  After reading the terraform [documentation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule), I decided to create the SNS resources first.  Essentially, GuardDuty will be configured as the target while EventBridge needs to be able to publish to SNS.  Because of this, SNS needs to be created first.
+
+When creating the SNS components, there was not too many difficulties.  To understand how SNS works, the topic and a subscription needs to be explained.  The *SNS topic* is a communication channel that can be used to send notifications to.  The *SNS subscription* is attached to the SNS topic to receive messages.  In our case, the SNS subscription would be configured for emails.  Additionally, an SNS topic policy was created for EventBridge access.  Since EventBridge was not created yet, the Resource was set to **"\*"** for now and will be updated later on.
+
+Once the terraform code was written and applied, it showed that all 3 resources were created successfully.  In order to get the SNS subscription verified, a confirmation email was sent to the specified email address (see first screenshot).  After clicking the verify link, the SNS infrastructure was complete.  To test that SNS was working, I used the AWS console to publish a **Test Message** to the given email.  After publishing the message, I was able to verify the sent message at my email address (see screenshots)!
+
+
+*Screenshots*
+*AWS Email Confirmation*<br>
+<img src="./img/sns-confirmation.png" alt="sns-confirmation"/>
+
+*Showcase of SNS Topic and Subscription*<br>
+<img src="./img/sns-topic-subscription.png" alt="sns-topic-subscription"/>
+
+*SNS Console Test*<br>
+<img src="./img/sns-test-message.png" alt="sns-test-message"/>
+
+*SNS Test Result*<br>
+<img src="./img/sns-test-result.png" alt="sns-test-result"/>
+
+## EventBridge
