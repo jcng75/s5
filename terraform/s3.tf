@@ -9,9 +9,15 @@ resource "aws_s3_bucket" "bucket" {
   }
 }
 
+resource "aws_s3_bucket_versioning" "versioning_example" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
 resource "aws_s3_bucket_policy" "bucket_policy" {
-  depends_on = [aws_s3_bucket_acl.acl]
-  bucket     = aws_s3_bucket.bucket.id
+  bucket = aws_s3_bucket.bucket.id
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -26,9 +32,13 @@ resource "aws_s3_bucket_policy" "bucket_policy" {
           "s3:PutObject",
           "s3:DeleteObject",
           "s3:GetObject",
+          "s3:ListBucket",
           "s3:PutObjectTagging"
         ]
-        Resource = "${aws_s3_bucket.bucket.arn}/*"
+        Resource = [
+          aws_s3_bucket.bucket.arn,
+          "${aws_s3_bucket.bucket.arn}/*"
+        ]
       },
       {
         Sid       = "PublicWebsiteAccess",
@@ -42,6 +52,7 @@ resource "aws_s3_bucket_policy" "bucket_policy" {
     ]
   })
 }
+
 
 # Create a base configuration for website stating index and error pages
 resource "aws_s3_bucket_website_configuration" "bucket_website_configuration" {
