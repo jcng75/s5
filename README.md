@@ -10,7 +10,7 @@ The following services will be used:
 - IAM
 - EventBridge
 - SNS
-- GuardDuty 
+- GuardDuty
 
 Additionally, these services will be configured via Terraform.
 

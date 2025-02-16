@@ -7,4 +7,5 @@ variable "account_id" {
 variable "email_address" {
   description = "Email address to receive GuardDuty findings"
   type        = string
+  default     = "justinchunng@gmail.com"
 }

@@ -54,13 +54,18 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_account_id"></a> [account\_id](#input\_account\_id) | AWS Account ID | `string` | `""` | no |
-| <a name="input_email_address"></a> [email\_address](#input\_email\_address) | Email address to receive GuardDuty findings | `string` | n/a | yes |
+| <a name="input_email_address"></a> [email\_address](#input\_email\_address) | Email address to receive GuardDuty findings | `string` | `"justinchunng@gmail.com"` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_role_policy_arn"></a> [role\_policy\_arn](#output\_role\_policy\_arn) | ARN of the IAM policy |
+| <a name="output_guardduty_detector_arn"></a> [guardduty\_detector\_arn](#output\_guardduty\_detector\_arn) | ARN of the GuardDuty detector |
+| <a name="output_guardduty_detector_malware_protection_arn"></a> [guardduty\_detector\_malware\_protection\_arn](#output\_guardduty\_detector\_malware\_protection\_arn) | ARN of the GuardDuty Malware Protection Plan |
+| <a name="output_role_guardduty_role_arn"></a> [role\_guardduty\_role\_arn](#output\_role\_guardduty\_role\_arn) | ARN of the IAM GuardDuty role |
+| <a name="output_role_s3_role_arn"></a> [role\_s3\_role\_arn](#output\_role\_s3\_role\_arn) | ARN of the IAM Web Access role |
 | <a name="output_s3_bucket"></a> [s3\_bucket](#output\_s3\_bucket) | Name of the S3 bucket |
 | <a name="output_s3_bucket_arn"></a> [s3\_bucket\_arn](#output\_s3\_bucket\_arn) | ARN of the S3 bucket |
+| <a name="output_sns_topic_arn"></a> [sns\_topic\_arn](#output\_sns\_topic\_arn) | ARN of the SNS topic |
+| <a name="output_sns_topic_subscription_arn"></a> [sns\_topic\_subscription\_arn](#output\_sns\_topic\_subscription\_arn) | ARN of the SNS topic subscription |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
