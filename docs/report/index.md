@@ -212,3 +212,43 @@ Once the terraform code was written and applied, it showed that all 3 resources 
 <img src="./img/sns-test-result.png" alt="sns-test-result"/>
 
 ## EventBridge
+
+```
+│ Error: "rule" cannot be longer than 64 characters: "arn:aws:events:us-east-1:xxxxxxxxxxxx:rule/guardduty_event_bus/guardduty_severity_rule"
+│
+│   with aws_cloudwatch_event_target.sns,
+│   on eventbridge.tf line 16, in resource "aws_cloudwatch_event_target" "sns":
+│   16:   rule      = aws_cloudwatch_event_rule.guardduty_event_rule.arn
+│
+╵
+╷
+│ Error: "rule" doesn't comply with restrictions ("^[0-9A-Za-z_.-]+$"): "arn:aws:events:us-east-1:xxxxxxxxxxxx:rule/guardduty_event_bus/guardduty_severity_rule"
+│
+│   with aws_cloudwatch_event_target.sns,
+│   on eventbridge.tf line 16, in resource "aws_cloudwatch_event_target" "sns":
+│   16:   rule      = aws_cloudwatch_event_rule.guardduty_event_rule.arn
+│
+```
+
+use .name instead of .arn
+
+```
+│ Error: creating EventBridge Target (guardduty_severity_rule-SendToSNS): operation error EventBridge: PutTargets, https response error StatusCode: 400, RequestID: e3b68bec-b11e-4325-8bb2-8ba522478cd7, ResourceNotFoundException: Rule guardduty_severity_rule does not exist on EventBus default.
+│
+│   with aws_cloudwatch_event_target.sns,
+│   on eventbridge.tf line 15, in resource "aws_cloudwatch_event_target" "sns":
+│   15: resource "aws_cloudwatch_event_target" "sns" {
+```
+solution - add event_bus_name field
+
+```
+│ Error: creating EventBridge Target (guardduty_event_bus-guardduty_severity_rule-SendToSNS): operation error EventBridge: PutTargets, https response error StatusCode: 400, RequestID: 3ff38638-c580-4b19-90e0-27e172224c7a, api error ValidationException: Invalid InputTemplate for target SendToSNS : [Source: (String)"            AWS null has a severity null GuardDuty finding type null in the null region.
+│             Finding Description:
+│             null.
+│             For more details open the GuardDuty console at https://console.aws.amazon.com/guardduty/home?region=null#/findings?search=id%3Dnull
+│ "; line: 1, column: 16].
+│
+│   with aws_cloudwatch_event_target.sns,
+│   on eventbridge.tf line 15, in resource "aws_cloudwatch_event_target" "sns":
+│   15: resource "aws_cloudwatch_event_target" "sns" {
+```
