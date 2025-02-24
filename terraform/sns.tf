@@ -21,7 +21,12 @@ resource "aws_sns_topic_policy" "guardduty_sns_topic_policy" {
           Service = "events.amazonaws.com"
         }
         Action   = "sns:Publish"
-        Resource = [aws_sns_topic.guardduty_sns_topic.arn]
+        Resource = aws_sns_topic.guardduty_sns_topic.arn
+        Condition = {
+          StringEquals = {
+            "AWS:SourceAccount" = data.aws_caller_identity.current.account_id
+          }
+        }
       }
     ]
   })

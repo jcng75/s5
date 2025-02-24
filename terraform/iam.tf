@@ -95,10 +95,6 @@ resource "aws_iam_policy" "assume_role_policy" {
   }
 }
 
-data "aws_iam_user" "user" {
-  user_name = "justin"
-}
-
 # Assigning assumerole policy to user
 resource "aws_iam_policy_attachment" "user_role_attachment" {
   name       = "user_role_attachment"
@@ -147,14 +143,10 @@ resource "aws_iam_policy" "guardduty_access_policy" {
           "events:PutRule",
           "events:DeleteRule",
           "events:PutTargets",
-          "events:RemoveTargets"
+          "events:RemoveTargets",
+          "events:PutEvents"
         ],
         Resource = "*"
-        Condition = {
-          "StringLike" : {
-            "events:ManagedBy" : "malware-protection-plan.guardduty.amazonaws.com"
-          }
-        }
       },
       {
         Sid    = "AllowPostScanTag",

@@ -213,6 +213,11 @@ Once the terraform code was written and applied, it showed that all 3 resources 
 
 ## EventBridge
 
+EventBridge was the last component that needed to be created in this project.  With that being said, I spent the *most* time working on creating this service, as debugging the various problem was challenging.  EventBridge has 3 main components that needed to be created in Terraform.  The EventBridge *Bus* is the channel that acts as a bridge between events and other AWS services.  In the Event Bus, there are Event *Rules*.  Each rule contains a "Match Pattern" that is used to detect a certain event pattern.  In this case, the event pattern would be looking for GuardDuty and each findings' severity level.  The Event *Target* is what we would like to send the event information to.  The target in this case would be the SNS Topic that was created in the previous step.
+
+*Challenges* <br>
+
+The first challenge that I ran into was configuring the resources:
 ```
 │ Error: "rule" cannot be longer than 64 characters: "arn:aws:events:us-east-1:xxxxxxxxxxxx:rule/guardduty_event_bus/guardduty_severity_rule"
 │
@@ -230,7 +235,7 @@ Once the terraform code was written and applied, it showed that all 3 resources 
 │
 ```
 
-use .name instead of .arn
+To fix this error, rule had to be configured to use name instead of arn.
 
 ```
 │ Error: creating EventBridge Target (guardduty_severity_rule-SendToSNS): operation error EventBridge: PutTargets, https response error StatusCode: 400, RequestID: e3b68bec-b11e-4325-8bb2-8ba522478cd7, ResourceNotFoundException: Rule guardduty_severity_rule does not exist on EventBus default.
@@ -239,16 +244,9 @@ use .name instead of .arn
 │   on eventbridge.tf line 15, in resource "aws_cloudwatch_event_target" "sns":
 │   15: resource "aws_cloudwatch_event_target" "sns" {
 ```
-solution - add event_bus_name field
+To fix this error, the cloudwatch_event_target had to be configured to include the event_bus_name field. <br>
 
-```
-│ Error: creating EventBridge Target (guardduty_event_bus-guardduty_severity_rule-SendToSNS): operation error EventBridge: PutTargets, https response error StatusCode: 400, RequestID: 3ff38638-c580-4b19-90e0-27e172224c7a, api error ValidationException: Invalid InputTemplate for target SendToSNS : [Source: (String)"            AWS null has a severity null GuardDuty finding type null in the null region.
-│             Finding Description:
-│             null.
-│             For more details open the GuardDuty console at https://console.aws.amazon.com/guardduty/home?region=null#/findings?search=id%3Dnull
-│ "; line: 1, column: 16].
-│
-│   with aws_cloudwatch_event_target.sns,
-│   on eventbridge.tf line 15, in resource "aws_cloudwatch_event_target" "sns":
-│   15: resource "aws_cloudwatch_event_target" "sns" {
-```
+The last issue that I ran into was the was testing
+
+aws_cloudwatch_event_bus_policy
+eventbridge_guardduty_role
