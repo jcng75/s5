@@ -22,15 +22,22 @@ resource "aws_cloudwatch_event_target" "sns" {
   # Configure transformer to convert event to SNS message
   input_transformer {
     input_paths = {
-      "severity" : "$.detail.severity",
-      "Account_ID" : "$.detail.accountId",
-      "Finding_ID" : "$.detail.id",
-      "Finding_Type" : "$.detail.type",
-      "region" : "$.region",
-      "Finding_description" : "$.detail.description"
-    }
+      "Account_ID": "$.detail.AccountId",
+      "Finding_ID": "$.detail.Id",
+      "Finding_Type": "$.detail.Type",
+      "Finding_description": "$.detail.Description",
+      "region": "$.Region",
+      "severity": "$.detail.Severity",
+      "title": "$.detail.Title"
+   }
 
-    input_template = "{\"default\": \"GuardDuty Finding\", \"severity\": <severity>, \"Account_ID\": <Account_ID>, \"Finding_ID\": <Finding_ID>, \"Finding_Type\": <Finding_Type>, \"region\": <region>, \"Finding_description\": <Finding_description>}"
+    input_template = <<TEMPLATE
+"<title>"
+"AWS <Account_ID> has a severity <severity> GuardDuty finding type <Finding_Type> in the <region> region."
+"Finding Description:"
+"<Finding_description>. "
+"For more details open the GuardDuty console at https://console.aws.amazon.com/guardduty/home?region=<region>#/findings?search=id%3D<Finding_ID>"
+  TEMPLATE
   }
 }
 
