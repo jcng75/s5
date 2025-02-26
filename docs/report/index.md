@@ -215,6 +215,30 @@ Once the terraform code was written and applied, it showed that all 3 resources 
 
 EventBridge was the last component that needed to be created in this project.  With that being said, I spent the *most* time working on creating this service, as debugging the various problem was challenging.  EventBridge has 3 main components that needed to be created in Terraform.  The EventBridge *Bus* is the channel that acts as a bridge between events and other AWS services.  In the Event Bus, there are Event *Rules*.  Each rule contains a "Match Pattern" that is used to detect a certain event pattern.  In this case, the event pattern would be looking for GuardDuty and each findings' severity level.  The Event *Target* is what we would like to send the event information to.  The target in this case would be the SNS Topic that was created in the previous step.
 
+When working on this component, a decision was made to use the `default` Event Bus.  The reasoning will be explained in the **Challenges** section.  After all the issues were resolved, I made one final test by uploading a malicious executable from a Kali Linux Virtual Machine into the S3 bucket.  The executable was downloaded from Malware Bazar.  A GuardDuty Finding was generated and the SNS topic published to my email (see last screenshot)!
+
+*Screenshots* <br>
+*Showcase EventBridge Rule not Triggering*<br>
+<img src="./img/eventbridge-severity-rule-graphs.png" alt="eventbridge-severity-rule-graphs"/>
+
+*Retrieve Object Upload JSON Findings*<br>
+<img src="./img/guardduty-findings-export.png" alt="guardduty-findings-export"/>
+
+*Inspect GuardDuty Findings*<br>
+<img src="./img/guardduty-json-results.png" alt="guardduty-json-results"/>
+
+*Test Rule Created*<br>
+<img src="./img/eventbridge-test-rule.png" alt="eventbridge-test-rule"/>
+
+*EventBridge Test Pattern*<br>
+<img src="./img/eventbridge-event-pattern.png" alt="eventbridge-event-pattern"/>
+
+*Test Rule Triggered*<br>
+<img src="./img/eventbridge-test-rule.png" alt="eventbridge-test-rule"/>
+
+*EventBridge GuardDuty Triggered Result*<br>
+<img src="./img/eventbridge-guardduty-connect.png" alt="eventbridge-guardduty-connect"/>
+
 *Challenges* <br>
 
 The first challenge that I ran into was configuring the resources:

@@ -146,7 +146,7 @@ resource "aws_iam_policy" "guardduty_access_policy" {
           "events:RemoveTargets",
           "events:PutEvents"
         ],
-        Resource = "*"
+        Resource = data.aws_cloudwatch_event_bus.event_bus.arn
       },
       {
         Sid    = "AllowPostScanTag",

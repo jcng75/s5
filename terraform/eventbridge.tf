@@ -1,35 +1,29 @@
-# Create the event bus
-resource "aws_cloudwatch_event_bus" "event_bus" {
-  name = "guardduty_event_bus"
-}
-
-# Create the event rule
+# NOTE: We will be using the default eventbridge bus
+# Create the event rule using
 resource "aws_cloudwatch_event_rule" "guardduty_event_rule" {
-  name           = "guardduty_severity_rule"
-  description    = "Rule that triggers on guardduty finding a dangerous S3 upload"
-  event_pattern  = file("event_pattern.json")
-  event_bus_name = aws_cloudwatch_event_bus.event_bus.name
+  name          = "guardduty_severity_rule"
+  description   = "Rule that triggers on guardduty finding a dangerous S3 upload"
+  event_pattern = file("event_pattern.json")
 }
 
 # Select cloudwatch event target (SNS) triggered by the event rule
 resource "aws_cloudwatch_event_target" "sns" {
-  rule           = aws_cloudwatch_event_rule.guardduty_event_rule.name
-  target_id      = "SendToSNS"
-  arn            = aws_sns_topic.guardduty_sns_topic.arn
-  event_bus_name = aws_cloudwatch_event_bus.event_bus.name
-  role_arn       = aws_iam_role.eventbridge_guardduty_role.arn
+  rule      = aws_cloudwatch_event_rule.guardduty_event_rule.name
+  target_id = "SendToSNS"
+  arn       = aws_sns_topic.guardduty_sns_topic.arn
+  role_arn  = aws_iam_role.eventbridge_guardduty_role.arn
 
   # Configure transformer to convert event to SNS message
   input_transformer {
     input_paths = {
-      "Account_ID": "$.detail.AccountId",
-      "Finding_ID": "$.detail.Id",
-      "Finding_Type": "$.detail.Type",
-      "Finding_description": "$.detail.Description",
-      "region": "$.Region",
-      "severity": "$.detail.Severity",
-      "title": "$.detail.Title"
-   }
+      "Account_ID" : "$.detail.AccountId",
+      "Finding_ID" : "$.detail.Id",
+      "Finding_Type" : "$.detail.Type",
+      "Finding_description" : "$.detail.Description",
+      "region" : "$.Region",
+      "severity" : "$.detail.Severity",
+      "title" : "$.detail.Title"
+    }
 
     input_template = <<TEMPLATE
 "<title>"
@@ -42,7 +36,7 @@ resource "aws_cloudwatch_event_target" "sns" {
 }
 
 resource "aws_cloudwatch_event_bus_policy" "guardduty_event_bus_policy" {
-  event_bus_name = aws_cloudwatch_event_bus.event_bus.id
+  event_bus_name = data.aws_cloudwatch_event_bus.event_bus.name
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -53,7 +47,7 @@ resource "aws_cloudwatch_event_bus_policy" "guardduty_event_bus_policy" {
           Service = "guardduty.amazonaws.com",
         }
         Action   = ["events:PutEvents"]
-        Resource = aws_cloudwatch_event_bus.event_bus.arn
+        Resource = data.aws_cloudwatch_event_bus.event_bus.arn
       }
     ]
   })
