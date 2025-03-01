@@ -1,4 +1,4 @@
-# S3 Secure Static Website
+# S5 - Secure Static Simple Storage Service
 
 ### Created and Written By - Justin Ng
 ### Started: January 19, 2025
