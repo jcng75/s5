@@ -277,3 +277,33 @@ The next thing I tried was testing if the event from the console.  Additionally,
 The last part of this was answering the question of connecting the Event Bus to GuardDuty.  By default, GuardDuty findings are sent to the **default** bus.  The only way to get this to send to the custom bus would be propagating the events from the default bus.  To keep it simple, I moved my findings and resources to the default bus.  In doing so, when generating a GuardDuty finding, I was able to see a successful SNS message!
 
 Looking back on the challenge, I should have created a Cloudwatch Group that would show the errors of the problems I've encountered.  In the future, I will implement this practice for future developments with AWS.
+
+## Python Scripting - Clearing S3 Malicious Files
+
+As I was working on configuring GuardDuty with EventBridge, another idea that came to mind was to remove any malicious files that were identiified within the S3 bucket.  While the identification process was similar to the `s3_store.py` script, it removes any GuardDuty-scanned objects that were tagged as a threat (THREATS_FOUND).  Using s3_store as a reference, I ran into minimal issues when creating the new script `s3_clear_malicious_files.py`.  When running through the tests on my local machine, I saw the following:
+
+`Using --dry-run argument:`
+```
+python3 s3_clear_malicious_files.py --dry-run
+Dry run has been enabled.
+Could not find GuardDutyMalwareScanStatus tag in the object: error.html
+Could not find GuardDutyMalwareScanStatus tag in the object: malware-protection-resource-validation-object
+GuardDuty has identified a malicious object: out.bin
+Identified 1 malicious files to be removed:
+- 'out.bin'
+No objects were removed as Dry Run has been enabled.
+```
+
+`Without --dry-run argument`
+```
+python3 s3_clear_malicious_files.py
+Could not find GuardDutyMalwareScanStatus tag in the object: error.html
+Could not find GuardDutyMalwareScanStatus tag in the object: malware-protection-resource-validation-object
+GuardDuty has identified a malicious object: out.bin
+Identified 1 malicious files to be removed:
+- 'out.bin'
+Deleted object: out.bin
+All malicious files have been removed.
+```
+
+After doing so, I checked the S3 bucket and the **out.bin** object that was added was successfully removed from the bucket!  Interestingly enough, error.html was not properly tagged by GuardDuty.  Upon further investigation, this was because the object was added *before* GuardDuty was correctly configured for the S3 bucket.
