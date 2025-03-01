@@ -1,5 +1,9 @@
 resource "aws_sns_topic" "guardduty_sns_topic" {
   name = "guardduty_sns_topic"
+
+  tags = {
+    "Orchestration": "Terraform"
+  }
 }
 
 resource "aws_sns_topic_subscription" "guardduty_sns_topic_subscription" {

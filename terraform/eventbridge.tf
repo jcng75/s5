@@ -4,6 +4,9 @@ resource "aws_cloudwatch_event_rule" "guardduty_event_rule" {
   name          = "guardduty_severity_rule"
   description   = "Rule that triggers on guardduty finding a dangerous S3 upload"
   event_pattern = file("event_pattern.json")
+  tags = {
+    "Orchestration": "Terraform"
+  }
 }
 
 # Select cloudwatch event target (SNS) triggered by the event rule
@@ -68,6 +71,10 @@ resource "aws_iam_role" "eventbridge_guardduty_role" {
       }
     ]
   })
+
+  tags = {
+    "Orchestration": "Terraform"
+  }
 }
 
 resource "aws_iam_role_policy" "eventbridge_policy" {
