@@ -2,7 +2,7 @@ resource "aws_sns_topic" "guardduty_sns_topic" {
   name = "guardduty_sns_topic"
 
   tags = {
-    "Orchestration": "Terraform"
+    "Orchestration" : "Terraform"
   }
 }
 

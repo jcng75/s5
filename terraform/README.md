@@ -67,6 +67,8 @@ No modules.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_eventbridge_role_arn"></a> [eventbridge\_role\_arn](#output\_eventbridge\_role\_arn) | ARN of the IAM EventBridge role |
+| <a name="output_eventbridge_rule_arn"></a> [eventbridge\_rule\_arn](#output\_eventbridge\_rule\_arn) | ARN of the EventBridge rule |
 | <a name="output_guardduty_detector_arn"></a> [guardduty\_detector\_arn](#output\_guardduty\_detector\_arn) | ARN of the GuardDuty detector |
 | <a name="output_guardduty_detector_malware_protection_arn"></a> [guardduty\_detector\_malware\_protection\_arn](#output\_guardduty\_detector\_malware\_protection\_arn) | ARN of the GuardDuty Malware Protection Plan |
 | <a name="output_role_guardduty_role_arn"></a> [role\_guardduty\_role\_arn](#output\_role\_guardduty\_role\_arn) | ARN of the IAM GuardDuty role |

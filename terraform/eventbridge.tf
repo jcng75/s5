@@ -5,7 +5,7 @@ resource "aws_cloudwatch_event_rule" "guardduty_event_rule" {
   description   = "Rule that triggers on guardduty finding a dangerous S3 upload"
   event_pattern = file("event_pattern.json")
   tags = {
-    "Orchestration": "Terraform"
+    "Orchestration" : "Terraform"
   }
 }
 
@@ -73,7 +73,7 @@ resource "aws_iam_role" "eventbridge_guardduty_role" {
   })
 
   tags = {
-    "Orchestration": "Terraform"
+    "Orchestration" : "Terraform"
   }
 }
 
