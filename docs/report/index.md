@@ -212,3 +212,68 @@ Once the terraform code was written and applied, it showed that all 3 resources 
 <img src="./img/sns-test-result.png" alt="sns-test-result"/>
 
 ## EventBridge
+
+EventBridge was the last component that needed to be created in this project.  With that being said, I spent the *most* time working on creating this service, as debugging the various problem was challenging.  EventBridge has 3 main components that needed to be created in Terraform.  The EventBridge *Bus* is the channel that acts as a bridge between events and other AWS services.  In the Event Bus, there are Event *Rules*.  Each rule contains a "Match Pattern" that is used to detect a certain event pattern.  In this case, the event pattern would be looking for GuardDuty and each findings' severity level.  The Event *Target* is what we would like to send the event information to.  The target in this case would be the SNS Topic that was created in the previous step.
+
+When working on this component, a decision was made to use the `default` Event Bus.  The reasoning will be explained in the **Challenges** section.  After all the issues were resolved, I made one final test by uploading a malicious executable from a Kali Linux Virtual Machine into the S3 bucket.  The executable was downloaded from Malware Bazar.  A GuardDuty Finding was generated and the SNS topic published to my email (see last screenshot)!
+
+*Screenshots* <br>
+*Showcase EventBridge Rule not Triggering*<br>
+<img src="./img/eventbridge-severity-rule-graphs.png" alt="eventbridge-severity-rule-graphs"/>
+
+*Retrieve Object Upload JSON Findings*<br>
+<img src="./img/guardduty-findings-export.png" alt="guardduty-findings-export"/>
+
+*Inspect GuardDuty Findings*<br>
+<img src="./img/guardduty-json-results.png" alt="guardduty-json-results"/>
+
+*Test Rule Created*<br>
+<img src="./img/eventbridge-test-rule.png" alt="eventbridge-test-rule"/>
+
+*EventBridge Test Pattern*<br>
+<img src="./img/eventbridge-event-pattern.png" alt="eventbridge-event-pattern"/>
+
+*Test Rule Triggered*<br>
+<img src="./img/eventbridge-test-rule.png" alt="eventbridge-test-rule"/>
+
+*EventBridge GuardDuty Triggered Result*<br>
+<img src="./img/eventbridge-guardduty-connect.png" alt="eventbridge-guardduty-connect"/>
+
+*Challenges* <br>
+
+The first challenge that I ran into was configuring the resources:
+```
+│ Error: "rule" cannot be longer than 64 characters: "arn:aws:events:us-east-1:xxxxxxxxxxxx:rule/guardduty_event_bus/guardduty_severity_rule"
+│
+│   with aws_cloudwatch_event_target.sns,
+│   on eventbridge.tf line 16, in resource "aws_cloudwatch_event_target" "sns":
+│   16:   rule      = aws_cloudwatch_event_rule.guardduty_event_rule.arn
+│
+╵
+╷
+│ Error: "rule" doesn't comply with restrictions ("^[0-9A-Za-z_.-]+$"): "arn:aws:events:us-east-1:xxxxxxxxxxxx:rule/guardduty_event_bus/guardduty_severity_rule"
+│
+│   with aws_cloudwatch_event_target.sns,
+│   on eventbridge.tf line 16, in resource "aws_cloudwatch_event_target" "sns":
+│   16:   rule      = aws_cloudwatch_event_rule.guardduty_event_rule.arn
+│
+```
+
+To fix this error, rule had to be configured to use name instead of arn.
+
+```
+│ Error: creating EventBridge Target (guardduty_severity_rule-SendToSNS): operation error EventBridge: PutTargets, https response error StatusCode: 400, RequestID: e3b68bec-b11e-4325-8bb2-8ba522478cd7, ResourceNotFoundException: Rule guardduty_severity_rule does not exist on EventBus default.
+│
+│   with aws_cloudwatch_event_target.sns,
+│   on eventbridge.tf line 15, in resource "aws_cloudwatch_event_target" "sns":
+│   15: resource "aws_cloudwatch_event_target" "sns" {
+```
+To fix this error, the cloudwatch_event_target had to be configured to include the event_bus_name field. <br>
+
+The last issue that I ran into was the was testing submitting GuardDuty findings to the EventBridge Bus.  There were a few things that needed to be done to reach a conclusion.  Debugging this issue was rather difficult.  From my perspective, I viewed that findings were shown within the GuardDuty console when uploading a malicious S3 object, but the event was not passed to the Custom EventBridge (see first screenshot).  While this shows just the EventBridge *rule* not displaying traffic, this also applied to the bus.  One change that I noticed was the EventBus policy.  Adding the [aws_cloudwatch_event_bus_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_bus_policy), this configured the bus to allow events from GuardDuty.  
+
+The next thing I tried was testing if the event from the console.  Additionally, I created the `eventbridge_guardduty_role`, which allowed EventBridge to publish to the SNS topic.  In each Event Bus, there is a feature to `Send Events`, which accepts an event source, detail type, and detail content.  To get the detail content, I retrieved the data by exporting the finding JSON from GuardDuty (see screenshots).  My current `event_pattern.json` uses `aws.guardduty` as the source.  One thing that I ran into when testing was that I was not "authorized" to use this source.  After looking into [this](https://repost.aws/questions/QU9O1i3AITRTqn32Kf6yTxFA/eventbridge-to-lambda-notauthorizedforsourceexception), I discovered that the event source cannot use "aws".  Instead, I changed the source to use test.guardduty in a test rule (see screenshots).  Doing this, I was able to confirm the event pattern and published to the SNS topic.
+
+The last part of this was answering the question of connecting the Event Bus to GuardDuty.  By default, GuardDuty findings are sent to the **default** bus.  The only way to get this to send to the custom bus would be propagating the events from the default bus.  To keep it simple, I moved my findings and resources to the default bus.  In doing so, when generating a GuardDuty finding, I was able to see a successful SNS message!
+
+Looking back on the challenge, I should have created a Cloudwatch Group that would show the errors of the problems I've encountered.  In the future, I will implement this practice for future developments with AWS.

@@ -37,3 +37,13 @@ output "sns_topic_subscription_arn" {
   value       = aws_sns_topic_subscription.guardduty_sns_topic_subscription.arn
   description = "ARN of the SNS topic subscription"
 }
+
+output "eventbridge_role_arn" {
+  value       = aws_iam_role.eventbridge_guardduty_role.arn
+  description = "ARN of the IAM EventBridge role"
+}
+
+output "eventbridge_rule_arn" {
+  value       = aws_cloudwatch_event_rule.guardduty_event_rule.arn
+  description = "ARN of the EventBridge rule"
+}

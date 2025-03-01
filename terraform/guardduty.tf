@@ -8,7 +8,7 @@ resource "aws_guardduty_detector" "guardduty" {
     }
   }
 
-  finding_publishing_frequency = "SIX_HOURS"
+  finding_publishing_frequency = "FIFTEEN_MINUTES"
 
   tags = {
     "Name"          = "GuardDuty",
