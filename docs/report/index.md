@@ -270,7 +270,10 @@ To fix this error, rule had to be configured to use name instead of arn.
 ```
 To fix this error, the cloudwatch_event_target had to be configured to include the event_bus_name field. <br>
 
-The last issue that I ran into was the was testing
+The last issue that I ran into was the was testing submitting GuardDuty findings to the EventBridge Bus.  There were a few things that needed to be done to reach a conclusion.  Debugging this issue was rather difficult.  From my perspective, I viewed that findings were shown within the GuardDuty console when uploading a malicious S3 object, but the event was not passed to the Custom EventBridge (see first screenshot).  While this shows just the EventBridge *rule* not displaying traffic, this also applied to the bus.  One change that I noticed was the EventBus policy.  Adding the [aws_cloudwatch_event_bus_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_bus_policy), this configured the bus to allow events from GuardDuty.  
 
-aws_cloudwatch_event_bus_policy
-eventbridge_guardduty_role
+The next thing I tried was testing if the event from the console.  Additionally, I created the `eventbridge_guardduty_role`, which allowed EventBridge to publish to the SNS topic.  In each Event Bus, there is a feature to `Send Events`, which accepts an event source, detail type, and detail content.  To get the detail content, I retrieved the data by exporting the finding JSON from GuardDuty (see screenshots).  My current `event_pattern.json` uses `aws.guardduty` as the source.  One thing that I ran into when testing was that I was not "authorized" to use this source.  After looking into [this](https://repost.aws/questions/QU9O1i3AITRTqn32Kf6yTxFA/eventbridge-to-lambda-notauthorizedforsourceexception), I discovered that the event source cannot use "aws".  Instead, I changed the source to use test.guardduty in a test rule (see screenshots).  Doing this, I was able to confirm the event pattern and published to the SNS topic.
+
+The last part of this was answering the question of connecting the Event Bus to GuardDuty.  By default, GuardDuty findings are sent to the **default** bus.  The only way to get this to send to the custom bus would be propagating the events from the default bus.  To keep it simple, I moved my findings and resources to the default bus.  In doing so, when generating a GuardDuty finding, I was able to see a successful SNS message!
+
+Looking back on the challenge, I should have created a Cloudwatch Group that would show the errors of the problems I've encountered.  In the future, I will implement this practice for future developments with AWS.
