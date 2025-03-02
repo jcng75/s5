@@ -2,7 +2,7 @@
 
 This document outlines the architecture to be implemented in the project. The diagram for the proposed architecture is shown below.
 
-*S3 Static Website Architecture*
+*S5 Architecture*
 ![s3-website-architecture](s3-website-project-architecture.jpg)
 
 # Requirements
@@ -15,9 +15,10 @@ To understand the architecture diagram, we must first establish the requirements
 
 # Functionality
 In addition to the requirements, we must identify user functionalities:
-- Users can upload files via the Python SDK
-- Users can access the S3 website through the internet
-- Users can receive emails about identified vulnerabilities
+- The public can access the S3 website through the internet
+- AWS user can upload/remove files via the Python SDK
+- Files that are being removed were determined malicious after being scanned
+- AWS user can receive emails about identified object vulnerabilities
 
 # Architecture Breakdown
 **Components**
@@ -25,11 +26,7 @@ In addition to the requirements, we must identify user functionalities:
 *S3*
   - A bucket used to host our static website
   - Publicly accessible via the internet
-  - Uploads are restricted to IAM roles
-
-*IAM*
-  - Creates an IAM role that users can assume
-  - This role includes a policy granting access to S3 actions
+  - File uploads/removes are restricted to IAM roles
 
 *GuardDuty*
   - Scans the S3 bucket for malicious files
@@ -43,6 +40,13 @@ In addition to the requirements, we must identify user functionalities:
   - Creates an SNS subscription to send alerts via email
   - Defines an SNS topic to include the subscription protocol
   - Sends an email to the user when EventBridge triggers an alert
+
+*IAM*
+  - Creates an IAM role that users can assume
+  - This role includes a policy granting access to S3 actions
+  - S3 Bucket must be IAM configured to allow access to GuardDuty Scans
+  - EventBridge must be IAM configured to allow GuardDuty to be able to publish object finding events
+  - SNS must be IAM configured to allow EventBridge to publish messages to an SNS Topic
 
 # Benefits
 This architecture offers several advantages:
