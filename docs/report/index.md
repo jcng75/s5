@@ -2,6 +2,7 @@
 
 ### Created and Written By - Justin Ng
 ### Started: January 19, 2025
+### Completed: March 2, 2025
 
 # Process Documentation
 
@@ -307,3 +308,62 @@ All malicious files have been removed.
 ```
 
 After doing so, I checked the S3 bucket and the **out.bin** object that was added was successfully removed from the bucket!  Interestingly enough, error.html was not properly tagged by GuardDuty.  Upon further investigation, this was because the object was added *before* GuardDuty was correctly configured for the S3 bucket.
+
+## Cost Analysis
+
+When going into the Root User to view the current costs within the account, the total was still $0.00 (see screenshot)!  This is due to the account being under `Free Tier`.  With the resources that were created, AWS offers free monthly limits that give users an opportunity to build out infrafrastructure patterns.  For example, Free Tier offers 5 GB of storage free of charge every month.  In our case, S3, EventBridge, SNS, and GuardDuty were covered so charges were not induced during this project.
+
+To read more about Free Tier account resource limits, you can do so [here](https://aws.amazon.com/free/).
+
+*AWS Cost Results*<br>
+<img src="./img/aws-cost-result.png" alt="aws-cost-results"/>
+
+## Dismantling Project Resources
+
+Once the project was complete, the resources created in my account need to be destroyed to prevent any additional costs.  While this configuration does not incure any costs at the moment, it may once my Free Tier account trial ends.  Since the project was written using Terraform, we can simply run the `terraform destroy` command that would cause all the resources to be removed.
+
+One minor issue that I encountered was trying to remove the AWS GuardDuty Malware Protection Plan.  The issue I was having was this error:
+
+```
+aws_guardduty_malware_protection_plan.protection_plan: Destroying... [id=acca817ce14c516012c2]
+╷
+│ Error: deleting AWS GuardDuty Malware Protection Plan ("acca817ce14c516012c2")
+│ 
+│ operation error GuardDuty: DeleteMalwareProtectionPlan, https response error StatusCode: 400, RequestID: 9fd82134-d740-4930-9026-ef7a808e90a0, BadRequestException: The request was rejected because the provided
+│ IAM role cannot be assumed by the service.
+╵
+```
+
+When checking the console, it turns out that the IAM Role that was created had been deleted before the protection plan could be disabled.  To fix this issue, I reassigned a temporary role in the console that was then terminated after rerunning the `terraform destroy` command.
+
+Once this was done, all of the resources that have been created were removed from terraform state and within the account!
+
+## Reflections
+
+After completing this project, there were many takeways that I had:
+- Designing architecture can be easier than implementing the design 
+  -  Upon initially creating the proposed architecture, I thought that the implmentation of the design would be smooth sailing.  In my mind, with a solid diagram listing out what each component relies on another component and vice versa.
+  - This proved not to be the case, as each component needed to be understood with their separate intricacies.  This leads into the next point that will be discussed below.
+- Starting from scratch can be difficult!
+  - This point could have been said before the previous point, but this is in the context of infrastructure.
+  - Each component that needs to be created may also need something that is not explicitly written within the Architectural Diagram.  This may be an oversight on my part, but I wanted to keep the diagram as simple as possible so it was easier to understand without knowing specifically what's going on "under the hood".
+  - While I currently work at a company that utilizes Terraform, it can be challenging to build out a brand new repository without having a reference.  With that being said, the challenge provided a lot of technical learning that would help me do similar projects in the future!
+- Debugging Infrastructure can be improved
+  - As discussed in the EventBridge section, I did not debug the service issues I was having "properly".
+  - In other cases, with the challenges faced in earlier sections, I could have done things better as well.  This shows that there is a lot of room for improvement to solve these issues faster next time.
+  - To do so, in future projects, I will try to use AWS built in services including the creation of CloudWatch Log Groups and CloudTrail Trails.
+- Security in the Cloud is important!
+  - The original itention of this project was to create a "Secure" Static Website that was hosted on an S3 bucket.  The title of this project is a little misleading, as users are able to view static content from the bucket due to it being a publicly available.  What was being secured were the permissions to upload/remove files from the bucket.  Additionally, GuardDuty was the cherry on top to ensure such files were not malicious.
+  - Having created the IAM Roles and Policies associated for the bucket, I see great value in the work I've done to maintain security.
+  - It is important to continue to use the principle of least privilege, as only specific users or resources should be able to access such services.
+- Optimizations can always be made!
+  - Access to the S3 Website was difficult from the developer's perspective.  To fix this, we could add a Route53 domain that would have a record pointing to the S3 endpoint.
+  - As discussed in the EventBridge section, the default bus was used for the Event Rule and Event Target.  Ideally, these resources should be in their own custom Event Bus, as having all rules inside the default bus can get tricky to manage.
+  - Outside of AWS, the current repo is not using runners for each github PR.  To improve the checks being made on each commit, a CI pipeline can be created to run these pre-commit checks through automation.
+- Proud of the work that was done!
+  - This project took a lot of work to complete.  When I first saw the idea, I realistically thought it would only take a few days to finish.  Wrapping this up after almost a month and a half, I was wrong.
+  - Part of the reason being creation of resources through IaC and having proper documentation, this organization will be benefitial for future projects as well.  I would like to continue to maintain a high standard for quality work that is being done in my journey as a Cloud Engineer!
+
+If you've read this far, I would just like to give you a big thank you for your support!  Hope to see you soon in projects to come!
+
+<img src="./img/aws-logo.png" alt="aws-logo"/>
