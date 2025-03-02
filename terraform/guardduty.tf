@@ -17,7 +17,8 @@ resource "aws_guardduty_detector" "guardduty" {
 }
 
 resource "aws_guardduty_malware_protection_plan" "protection_plan" {
-  role = aws_iam_role.guardduty_role.arn
+  depends_on = [aws_iam_role.guardduty_role]
+  role       = aws_iam_role.guardduty_role.arn
 
   protected_resource {
     s3_bucket {
