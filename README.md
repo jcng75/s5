@@ -37,7 +37,9 @@ backend "s3" {
 
 Within my AWS account, I have provisioned an S3 bucket managing the tfstate file of my terraform code.  Additionally, a DynamoDB table has already been configured to manage terraform locks.  If you would like to have this done for your account as well, I have created a repository that can help you get this set up [here](https://github.com/jcng75/terraform-aws-configuration).  If you would like to manage the tfstate file within your local machine, please remove the `backend "s3"` block.
 
-Once this is configured, run a `terraform plan` alongside a `terraform apply`.  Please note that for my example, you would have to input the desired email address to create the SNS subscription.  The current default email has been set to `justinchunng@gmail.com`.  This would have to be updated in [here](https://github.com/jcng75/s3-secure-static-website/blob/main/terraform/variables.tf) under `email_address`. To read more about the process of setting that up, please read the report in `docs/index.md`!
+Once this is configured, run a `terraform plan` alongside a `terraform apply`.  Please note that for my example, you would have to input the desired email address to create the SNS subscription.  The current default email has been set to `justinchunng@gmail.com`.  This would have to be updated in [here](https://github.com/jcng75/s3-secure-static-website/blob/main/terraform/variables.tf) under `email_address`. To read more about the process of setting that up, please read the report in `docs/index.md` within the SNS section!
+
+Additionally, ensure the data source `aws_iam_user` is configured to the IAM user in your account that you would like to provision resources with.  In my example, the user was configured to **justin**.
 
 In order to use the Python Scripts created, an `.env` file needs to be made within the `scripts/` subdirectory.  In each script, a **ROLE_ARN** is needed to be able to have access with using the S3 bucket.  After running the terraform commands, the outputs should generate an ARN under the name `role_s3_role_arn`.  In doing so, please populate the `.env` file with the value.
 ```
