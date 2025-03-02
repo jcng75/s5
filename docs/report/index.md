@@ -359,6 +359,7 @@ After completing this project, there were many takeways that I had:
 - Optimizations can always be made!
   - Access to the S3 Website was difficult from the developer's perspective.  To fix this, we could add a Route53 domain that would have a record pointing to the S3 endpoint.
   - As discussed in the EventBridge section, the default bus was used for the Event Rule and Event Target.  Ideally, these resources should be in their own custom Event Bus, as having all rules inside the default bus can get tricky to manage.
+  - To provision the resources, I used the user `justin` that was already created before starting the project.  Ideally, this user's permissions should be separate from the role and policies that were associated.  To improve this, a new **separate** user should be created instead.
   - Outside of AWS, the current repo is not using runners for each github PR.  To improve the checks being made on each commit, a CI pipeline can be created to run these pre-commit checks through automation.
 - Proud of the work that was done!
   - This project took a lot of work to complete.  When I first saw the idea, I realistically thought it would only take a few days to finish.  Wrapping this up after almost a month and a half, I was wrong.
