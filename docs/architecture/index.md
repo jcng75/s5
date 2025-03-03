@@ -3,6 +3,7 @@
 This document outlines the architecture to be implemented in the project. The diagram for the proposed architecture is shown below.
 
 *S5 Architecture*
+
 ![s3-website-architecture](s3-website-project-architecture.jpg)
 
 # Requirements
