@@ -162,10 +162,10 @@ open(path, "rb")
 
 *Screenshots*
 
-*Showcase of S3 Object Encryption Configuration*
+*Showcase of S3 Object Encryption Configuration* <br/>
 <img src="./img/s3-encryption.png" alt="s3-encryption"/>
 
-*Showcase of S3 Object Upload*
+*Showcase of S3 Object Upload* <br/>
 <img src="./img/s3-upload.png" alt="s3-upload"/>
 
 ## Terraform - GuardDuty
@@ -199,13 +199,13 @@ Looking at various sources, I had ensured that proper S3 actions were accounted 
 
 *Screenshots*
 
-*Showcase of GuardDuty Findings in S3 Bucket*
+*Showcase of GuardDuty Findings in S3 Bucket* <br/>
 <img src="./img/guardduty-findings.png" alt="guardduty-findings"/>
 
-*Showcase of GuardDuty Tagging for S3 Object*
+*Showcase of GuardDuty Tagging for S3 Object* <br/>
 <img src="./img/guardduty-scan-tag.png" alt="guardduty-scan-tag"/>
 
-*Showcase of GuardDuty Malicious File Attempt*
+*Showcase of GuardDuty Malicious File Attempt* <br/>
 <img src="./img/guardduty-scan-tag-2.png" alt="guardduty-scan-tag-2"/>
 
 ## SNS
@@ -222,16 +222,16 @@ Once the Terraform code was written and applied, it showed that all 3 resources 
 
 
 *Screenshots*
-*AWS Email Confirmation*
+*AWS Email Confirmation* <br/>
 <img src="./img/sns-confirmation.png" alt="sns-confirmation"/>
 
-*Showcase of SNS Topic and Subscription*
+*Showcase of SNS Topic and Subscription* <br/>
 <img src="./img/sns-topic-subscription.png" alt="sns-topic-subscription"/>
 
-*SNS Console Test*
+*SNS Console Test* <br/>
 <img src="./img/sns-test-message.png" alt="sns-test-message"/>
 
-*SNS Test Result*
+*SNS Test Result* <br/>
 <img src="./img/sns-test-result.png" alt="sns-test-result"/>
 
 ## EventBridge
@@ -245,25 +245,25 @@ When working on this component, a decision was made to use the `default` Event B
 
 *Screenshots*
 
-*Showcase EventBridge Rule not Triggering*
+*Showcase EventBridge Rule not Triggering* <br/>
 <img src="./img/eventbridge-severity-rule-graphs.png" alt="eventbridge-severity-rule-graphs"/>
 
-*Retrieve Object Upload JSON Findings*
+*Retrieve Object Upload JSON Findings* <br/>
 <img src="./img/guardduty-findings-export.png" alt="guardduty-findings-export"/>
 
-*Inspect GuardDuty Findings*
+*Inspect GuardDuty Findings* <br/>
 <img src="./img/guardduty-json-results.png" alt="guardduty-json-results"/>
 
-*Test Rule Created*
+*Test Rule Created* <br/>
 <img src="./img/eventbridge-test-rule.png" alt="eventbridge-test-rule"/>
 
-*EventBridge Test Pattern*
+*EventBridge Test Pattern* <br/>
 <img src="./img/eventbridge-event-pattern.png" alt="eventbridge-event-pattern"/>
 
-*Test Rule Triggered*
+*Test Rule Triggered* <br/>
 <img src="./img/eventbridge-test-rule.png" alt="eventbridge-test-rule"/>
 
-*EventBridge GuardDuty Triggered Result*
+*EventBridge GuardDuty Triggered Result* <br/>
 <img src="./img/eventbridge-guardduty-connect.png" alt="eventbridge-guardduty-connect"/>
 
 *Challenges*
@@ -351,7 +351,7 @@ When going into the Root User to view the current costs within the account, the 
 
 To read more about Free Tier account resource limits, you can do so [here](https://aws.amazon.com/free/).
 
-*AWS Cost Results*
+*AWS Cost Results* <br/>
 <img src="./img/aws-cost-result.png" alt="aws-cost-results"/>
 
 ## Dismantling Project Resources
